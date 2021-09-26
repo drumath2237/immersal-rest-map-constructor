@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.XR.ARCore;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -29,13 +30,12 @@ namespace ImmersalRestMapConstructor
             var (result, info) =
                 await ARCameraCapture.GetCameraCaptureInfoAsync(_cameraManager, this.GetCancellationTokenOnDestroy());
 
-            _logText.text = result.ToString();
-
             _texture2D = info.cameraTexture;
         }
 
         private void Update()
         {
+            _logText.text = ARSession.state.ToString();
             if (_renderer != null && _texture2D != null)
             {
                 _renderer.material.mainTexture = _texture2D;

@@ -22,7 +22,7 @@ namespace ImmersalRestMapConstructor
             {
                 return (false, default);
             }
-
+            
 
             var resultTextureTask = ConvertARCameraImageToTextureAsync(image, token);
             image.Dispose();
