@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Cysharp.Threading.Tasks;
 using ImmersalRestMapConstructor.CaptureData;
 using TMPro;
@@ -19,6 +22,8 @@ namespace ImmersalRestMapConstructor
 
         private Texture2D _texture2D;
 
+        private CaptureMapInfo _mapInfo;
+
 
         private IEnumerator Start()
         {
@@ -26,8 +31,15 @@ namespace ImmersalRestMapConstructor
             {
                 yield break;
             }
-            
+
             Input.location.Start();
+
+            _mapInfo = new CaptureMapInfo
+            {
+                name = "Test Map",
+                token = "Test Token",
+                images = new List<CaptureImageInfo>()
+            };
         }
 
         public void Capture()
@@ -35,6 +47,26 @@ namespace ImmersalRestMapConstructor
             if (Input.location.status != LocationServiceStatus.Running)
             {
                 return;
+            }
+
+            if (_mapInfo.focalLength == default || _mapInfo.principalOffset == default)
+            {
+                if (!_cameraManager.TryGetIntrinsics(out var intrinsics))
+                {
+                    return;
+                }
+
+                _mapInfo.focalLength = new Vector2
+                {
+                    x = intrinsics.focalLength.x,
+                    y = intrinsics.focalLength.y
+                };
+
+                _mapInfo.principalOffset = new Vector2
+                {
+                    x = intrinsics.principalPoint.x,
+                    y = intrinsics.principalPoint.y
+                };
             }
 
 
@@ -59,9 +91,29 @@ namespace ImmersalRestMapConstructor
                 run = 0
             };
 
+            _mapInfo.images.Add(imageInfo);
+
             _logText.text = JsonUtility.ToJson(imageInfo, true);
 
             _texture2D = info.cameraTexture;
+        }
+
+        public void SaveJsonData()
+        {
+            SaveJsonDataAsync().Forget();
+        }
+
+        private async UniTask SaveJsonDataAsync()
+        {
+            var filename = Path.Combine(Application.persistentDataPath, "imageData.json");
+            using var writer = new StreamWriter(filename, false);
+
+            await writer.WriteAsync(JsonUtility.ToJson(_mapInfo, true));
+
+            await writer.FlushAsync();
+            
+            writer.Close();
+
         }
 
         private void Update()
