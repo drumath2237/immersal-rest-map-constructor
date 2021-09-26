@@ -15,7 +15,7 @@ namespace ImmersalRestMapConstructor
 
     public static class ARCameraCapture
     {
-        public static async UniTask<(bool, CaptureInfo)> GetCameraCaptureAsync(ARCameraManager manager,
+        public static async UniTask<(bool, CaptureInfo)> GetCameraCaptureInfoAsync(ARCameraManager manager,
             CancellationToken token)
         {
             if (!manager.TryAcquireLatestCpuImage(out var image))
@@ -25,6 +25,7 @@ namespace ImmersalRestMapConstructor
 
 
             var resultTextureTask = ConvertARCameraImageToTextureAsync(image, token);
+            image.Dispose();
 
             var cameraTransform = manager.transform;
             var cameraPose = new Pose
@@ -81,6 +82,7 @@ namespace ImmersalRestMapConstructor
             {
                 texture2d.LoadRawTextureData(bytes);
                 texture2d.Apply();
+                bytes.Dispose();
             }, null);
 
             return texture2d;
