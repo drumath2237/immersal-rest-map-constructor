@@ -78,12 +78,11 @@ namespace ImmersalRestMapConstructor
 
             var bytes = conversionTask.GetData<byte>();
 
-            context.Post(state =>
-            {
-                texture2d.LoadRawTextureData(bytes);
-                texture2d.Apply();
-                bytes.Dispose();
-            }, null);
+            await UniTask.SwitchToMainThread(cancellationToken);
+
+            texture2d.LoadRawTextureData(bytes);
+            texture2d.Apply();
+            bytes.Dispose();
 
             return texture2d;
         }
