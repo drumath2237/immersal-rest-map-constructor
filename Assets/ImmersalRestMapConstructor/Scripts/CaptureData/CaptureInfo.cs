@@ -5,14 +5,30 @@ using UnityEngine;
 namespace ImmersalRestMapConstructor.CaptureData
 {
     [Serializable]
+    public struct Location
+    {
+        public float longitude;
+        public float latitude;
+        public float altitude;
+
+        public static Location ConvertFromLocationInfo(LocationInfo info)
+        {
+            return new Location
+            {
+                altitude = info.altitude,
+                latitude = info.latitude,
+                longitude = info.longitude
+            };
+        }
+    }
+
+    [Serializable]
     public struct CaptureImageInfo
     {
         public Pose pose;
         public int run; // incremented when tracking failed
         public bool anchor;
-        public float longitude;
-        public float latitude;
-        public float altitude;
+        public Location location;
     }
 
     [Serializable]
