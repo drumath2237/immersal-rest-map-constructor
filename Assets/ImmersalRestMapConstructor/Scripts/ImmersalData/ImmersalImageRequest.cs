@@ -13,6 +13,7 @@ namespace ImmersalRestMapConstructor.ImmersalData
     [Serializable]
     public struct ImmersalImageRequest
     {
+        public string token;
         public int bank;
         public int run;
         public int index;
