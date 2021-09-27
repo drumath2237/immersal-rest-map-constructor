@@ -1,10 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Text;
 using Cysharp.Threading.Tasks;
+using ImmersalRestMapConstructor.CaptureData;
 using UnityEngine;
 
 namespace ImmersalRestMapConstructor
 {
-    public class PersistantDataFileManager
+    public static class PersistantDataFileManager
     {
         /// <summary>
         /// save texture for png format to persistant data path
@@ -27,6 +30,28 @@ namespace ImmersalRestMapConstructor
             fs.Close();
         }
 
+        public static async UniTask<(bool, string)> ReadCaptureImageAsBase64(
+            string filename
+        )
+        {
+            var filepath = Path.Combine(Application.persistentDataPath, filename);
+            if (!File.Exists(filepath))
+            {
+                return (false, null);
+            }
+
+            using var fs = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+            var resultBytes = new byte[fs.Length];
+
+            await fs.ReadAsync(resultBytes, 0, (int)fs.Length);
+            
+            fs.Close();
+
+            var b64 = Convert.ToBase64String(resultBytes);
+
+            return (true, b64);
+        }
+
         public static async UniTask SaveJsonDataAsync(string filename, string jsonData)
         {
             var filepath = Path.Combine(Application.persistentDataPath, filename);
@@ -37,6 +62,25 @@ namespace ImmersalRestMapConstructor
             await writer.FlushAsync();
 
             writer.Close();
+        }
+
+        public static async UniTask<(bool, CaptureMapInfo info)> ReadCaptureMapInfoFromJson(string filename)
+        {
+            var filepath = Path.Combine(Application.persistentDataPath, filename);
+
+            if (!File.Exists(filepath))
+            {
+                return (false, default);
+            }
+
+            using var reader = new StreamReader(filepath, Encoding.UTF8);
+            var jsonData = await reader.ReadToEndAsync();
+            
+            reader.Close();
+
+            var mapinfo = JsonUtility.FromJson<CaptureMapInfo>(jsonData);
+            
+            return (true, mapinfo);
         }
     }
 }
