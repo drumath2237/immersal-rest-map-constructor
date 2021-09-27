@@ -45,8 +45,11 @@ namespace ImmersalRestMapConstructor
         {
             var imageData = info.images[index];
 
-            var cameraPosition = imageData.pose.position;
-            var cameraQuaternion = imageData.pose.rotation;
+            var _p = imageData.pose.position;
+            var cameraPosition = new Vector3(_p.x, _p.y, -_p.z);
+
+            var _q = imageData.pose.rotation;
+            var cameraQuaternion = new Quaternion(_q.x, _q.y, -_q.z, -_q.w);
 
             var cameraPoseMatrix = Matrix4x4.TRS(cameraPosition, cameraQuaternion, Vector3.one);
 
@@ -56,7 +59,7 @@ namespace ImmersalRestMapConstructor
                 bank = 0,
                 run = 0,
                 index = index,
-                anchor = false,
+                anchor =imageData.anchor,
 
                 px = cameraPoseMatrix.m03,
                 py = cameraPoseMatrix.m13,

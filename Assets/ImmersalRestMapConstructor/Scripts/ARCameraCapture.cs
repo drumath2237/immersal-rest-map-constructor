@@ -54,7 +54,7 @@ namespace ImmersalRestMapConstructor
 
             var conversionParams = new XRCpuImage.ConversionParams
             {
-                transformation = XRCpuImage.Transformation.MirrorX,
+                transformation = XRCpuImage.Transformation.None,
                 outputFormat = TextureFormat.RGBA32,
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),

@@ -40,29 +40,28 @@ namespace ImmersalRestMapConstructor
         //         token = "Test Token",
         //         images = new List<CaptureImageInfo>()
         //     };
-        //     
-        //     
         // }
 
         private void Start()
         {
-            PersistantDataFileManager.ReadCaptureMapInfoFromJson("imageData.json")
-                .ContinueWith(res =>
-                {
-                    if (!res.Item1)
-                    {
-                        Debug.Log("file not found");
-                    }
+            SendImageCaptureRequest().Forget();
+        }
 
-                    Debug.Log(res.info.images.Count);
-                });
+        private async UniTask SendImageCaptureRequest()
+        {
+            var (jsonExist, mapInfo) = await PersistantDataFileManager.ReadCaptureMapInfoFromJson("imageData.json");
 
-            PersistantDataFileManager.ReadCaptureImageAsBase64("0.png")
-                .ContinueWith(res =>
-                {
-                    var isExist = res.Item1;
-                    var b64 = res.Item2;
-                });
+            if (!jsonExist)
+            {
+                return;
+            }
+
+            for (var i = 0; i < mapInfo.images.Count; i++)
+            {
+                var (success, result) = await ImmersalMapConstructorClient.TryRequestImage(mapInfo, i);
+
+                Debug.Log(result.path);
+            }
         }
 
         public void Capture()
