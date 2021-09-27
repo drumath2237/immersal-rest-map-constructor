@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using Cysharp.Threading.Tasks;
 using ImmersalRestMapConstructor.CaptureData;
 using TMPro;
@@ -96,45 +95,18 @@ namespace ImmersalRestMapConstructor
 
             _mapInfo.images.Add(imageInfo);
 
-            SaveCaptureImage($"{_captureIndex++}.png", info.cameraTexture).Forget();
+            PersistantDataFileManager
+                .SaveCaptureImage($"{_captureIndex++}.png", info.cameraTexture)
+                .Forget();
 
             _texture2D = info.cameraTexture;
         }
 
-        /// <summary>
-        /// save texture for png format to persistant data path
-        /// </summary>
-        /// <param name="filename">not filepath. just a filename including extension</param>
-        /// <param name="texture2D">texture data</param>
-        private static async UniTask SaveCaptureImage(string filename, Texture2D texture2D)
-        {
-            var filepath = Path.Combine(Application.persistentDataPath, filename);
-            using var fs = new FileStream(filepath, FileMode.CreateNew, FileAccess.Write);
-
-            var textureBytes = texture2D.EncodeToPNG();
-
-            await fs.WriteAsync(textureBytes, 0, textureBytes.Length);
-
-            await fs.FlushAsync();
-            
-            fs.Close();
-        }
-
         public void SaveJsonData()
         {
-            SaveJsonDataAsync().Forget();
-        }
-
-        private async UniTask SaveJsonDataAsync()
-        {
-            var filename = Path.Combine(Application.persistentDataPath, "imageData.json");
-            using var writer = new StreamWriter(filename, false);
-
-            await writer.WriteAsync(JsonUtility.ToJson(_mapInfo, true));
-
-            await writer.FlushAsync();
-
-            writer.Close();
+            PersistantDataFileManager
+                .SaveJsonDataAsync("imageData.json", JsonUtility.ToJson(_mapInfo))
+                .Forget();
         }
 
         private void Update()
