@@ -25,21 +25,44 @@ namespace ImmersalRestMapConstructor
         private int _captureIndex = 0;
 
 
-        private IEnumerator Start()
+        // private IEnumerator Start()
+        // {
+        //     if (!Input.location.isEnabledByUser)
+        //     {
+        //         yield break;
+        //     }
+        //
+        //     Input.location.Start();
+        //
+        //     _mapInfo = new CaptureMapInfo
+        //     {
+        //         name = "Test Map",
+        //         token = "Test Token",
+        //         images = new List<CaptureImageInfo>()
+        //     };
+        //     
+        //     
+        // }
+
+        private void Start()
         {
-            if (!Input.location.isEnabledByUser)
-            {
-                yield break;
-            }
+            PersistantDataFileManager.ReadCaptureMapInfoFromJson("imageData.json")
+                .ContinueWith(res =>
+                {
+                    if (!res.Item1)
+                    {
+                        Debug.Log("file not found");
+                    }
 
-            Input.location.Start();
+                    Debug.Log(res.info.images.Count);
+                });
 
-            _mapInfo = new CaptureMapInfo
-            {
-                name = "Test Map",
-                token = "Test Token",
-                images = new List<CaptureImageInfo>()
-            };
+            PersistantDataFileManager.ReadCaptureImageAsBase64("0.png")
+                .ContinueWith(res =>
+                {
+                    var isExist = res.Item1;
+                    var b64 = res.Item2;
+                });
         }
 
         public void Capture()
