@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Cysharp.Threading.Tasks;
 using ImmersalRestMapConstructor.CaptureData;
 using TMPro;
@@ -23,6 +22,8 @@ namespace ImmersalRestMapConstructor
         private Texture2D _texture2D;
 
         private CaptureMapInfo _mapInfo;
+
+        private int _captureIndex = 0;
 
 
         private IEnumerator Start()
@@ -55,6 +56,8 @@ namespace ImmersalRestMapConstructor
                 {
                     return;
                 }
+
+                _logText.text = intrinsics.principalPoint.ToString();
 
                 _mapInfo.focalLength = new Vector2
                 {
@@ -93,9 +96,28 @@ namespace ImmersalRestMapConstructor
 
             _mapInfo.images.Add(imageInfo);
 
-            _logText.text = JsonUtility.ToJson(imageInfo, true);
+            SaveCaptureImage($"{_captureIndex++}.png", info.cameraTexture).Forget();
 
             _texture2D = info.cameraTexture;
+        }
+
+        /// <summary>
+        /// save texture for png format to persistant data path
+        /// </summary>
+        /// <param name="filename">not filepath. just a filename including extension</param>
+        /// <param name="texture2D">texture data</param>
+        private static async UniTask SaveCaptureImage(string filename, Texture2D texture2D)
+        {
+            var filepath = Path.Combine(Application.persistentDataPath, filename);
+            using var fs = new FileStream(filepath, FileMode.CreateNew, FileAccess.Write);
+
+            var textureBytes = texture2D.EncodeToPNG();
+
+            await fs.WriteAsync(textureBytes, 0, textureBytes.Length);
+
+            await fs.FlushAsync();
+            
+            fs.Close();
         }
 
         public void SaveJsonData()
@@ -111,9 +133,8 @@ namespace ImmersalRestMapConstructor
             await writer.WriteAsync(JsonUtility.ToJson(_mapInfo, true));
 
             await writer.FlushAsync();
-            
-            writer.Close();
 
+            writer.Close();
         }
 
         private void Update()
