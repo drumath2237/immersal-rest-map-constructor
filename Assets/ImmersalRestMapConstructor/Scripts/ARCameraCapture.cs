@@ -18,11 +18,10 @@ namespace ImmersalRestMapConstructor
         public static async UniTask<(bool, CaptureInfo)> GetCameraCaptureInfoAsync(ARCameraManager manager,
             CancellationToken token)
         {
-            if (!manager.TryAcquireLatestCpuImage(out var image))
+            if (!manager.subsystem.TryAcquireLatestCpuImage(out var image))
             {
                 return (false, default);
             }
-            
 
             var resultTextureTask = ConvertARCameraImageToTextureAsync(image, token);
             image.Dispose();
@@ -50,12 +49,10 @@ namespace ImmersalRestMapConstructor
             CancellationToken cancellationToken
         )
         {
-            var context = SynchronizationContext.Current;
-
             var conversionParams = new XRCpuImage.ConversionParams
             {
-                transformation = XRCpuImage.Transformation.None,
-                outputFormat = TextureFormat.RGBA32,
+                transformation = XRCpuImage.Transformation.MirrorX,
+                outputFormat = TextureFormat.RGB24,
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),
             };

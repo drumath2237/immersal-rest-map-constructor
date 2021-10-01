@@ -25,28 +25,26 @@ namespace ImmersalRestMapConstructor
         private int _captureIndex = 0;
 
 
-        // private IEnumerator Start()
-        // {
-        //     if (!Input.location.isEnabledByUser)
-        //     {
-        //         yield break;
-        //     }
-        //
-        //     Input.location.Start();
-        //
-        //     _mapInfo = new CaptureMapInfo
-        //     {
-        //         name = "Test Map",
-        //         token = "Test Token",
-        //         images = new List<CaptureImageInfo>()
-        //     };
-        // }
-
-        private void Start()
+        private IEnumerator Start()
         {
+            // if (!Input.location.isEnabledByUser)
+            // {
+            //     yield break;
+            // }
+            //
+            // Input.location.Start();
+            //
+            // _mapInfo = new CaptureMapInfo
+            // {
+            //     name = "Test Map",
+            //     token = "Test Token",
+            //     images = new List<CaptureImageInfo>()
+            // };
+            
             SendImageCaptureRequest().Forget();
-        }
+            yield return null;
 
+        }
         private async UniTask SendImageCaptureRequest()
         {
             var (jsonExist, mapInfo) = await PersistantDataFileManager.ReadCaptureMapInfoFromJson("imageData.json");
@@ -67,6 +65,19 @@ namespace ImmersalRestMapConstructor
         public void Capture()
         {
             if (Input.location.status != LocationServiceStatus.Running)
+            {
+                return;
+            }
+
+            CaptureAsync().Forget();
+        }
+
+        private async UniTask CaptureAsync()
+        {
+            var (result, info) =
+                await ARCameraCapture.GetCameraCaptureInfoAsync(_cameraManager, this.GetCancellationTokenOnDestroy());
+
+            if (!result)
             {
                 return;
             }
@@ -93,20 +104,6 @@ namespace ImmersalRestMapConstructor
                 };
             }
 
-
-            CaptureAsync().Forget();
-        }
-
-        private async UniTask CaptureAsync()
-        {
-            var (result, info) =
-                await ARCameraCapture.GetCameraCaptureInfoAsync(_cameraManager, this.GetCancellationTokenOnDestroy());
-
-            if (!result)
-            {
-                return;
-            }
-
             var imageInfo = new CaptureImageInfo
             {
                 anchor = false,
@@ -127,7 +124,7 @@ namespace ImmersalRestMapConstructor
         public void SaveJsonData()
         {
             PersistantDataFileManager
-                .SaveJsonDataAsync("imageData.json", JsonUtility.ToJson(_mapInfo))
+                .SaveJsonDataAsync("imageData.json", JsonUtility.ToJson(_mapInfo, true))
                 .Forget();
         }
 
