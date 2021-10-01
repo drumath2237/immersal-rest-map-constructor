@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using ImmersalRestMapConstructor.CaptureData;
 using TMPro;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
@@ -24,27 +26,58 @@ namespace ImmersalRestMapConstructor
 
         private int _captureIndex = 0;
 
+        private bool isCameraConfigInit = false;
+
 
         private IEnumerator Start()
         {
-            // if (!Input.location.isEnabledByUser)
-            // {
-            //     yield break;
-            // }
-            //
-            // Input.location.Start();
-            //
-            // _mapInfo = new CaptureMapInfo
-            // {
-            //     name = "Test Map",
-            //     token = "Test Token",
-            //     images = new List<CaptureImageInfo>()
-            // };
-            
-            SendImageCaptureRequest().Forget();
-            yield return null;
+            if (!Input.location.isEnabledByUser)
+            {
+                yield break;
+            }
 
+            Input.location.Start();
+
+            _mapInfo = new CaptureMapInfo
+            {
+                name = "Test Map",
+                token = "Test Token",
+                images = new List<CaptureImageInfo>()
+            };
+
+            _cameraManager.frameReceived += args =>
+            {
+                InitializeCameraConfig();
+            };
+
+            // SendImageCaptureRequest().Forget();
+            // yield return null;
         }
+
+        private void InitializeCameraConfig()
+        {
+            if (isCameraConfigInit)
+            {
+                return;
+            }
+
+            using var configs = _cameraManager.GetConfigurations(Allocator.Temp);
+
+            var niceConfig = configs.FirstOrDefault(configuration => configuration.width == 1920);
+
+            try
+            {
+                _cameraManager.currentConfiguration = niceConfig;
+            }
+            catch (Exception e)
+            {
+                Debug.Log("camera config error with: " + e);
+                return;
+            }
+
+            isCameraConfigInit = true;
+        }
+
         private async UniTask SendImageCaptureRequest()
         {
             var (jsonExist, mapInfo) = await PersistantDataFileManager.ReadCaptureMapInfoFromJson("imageData.json");
@@ -68,6 +101,8 @@ namespace ImmersalRestMapConstructor
             {
                 return;
             }
+
+            InitializeCameraConfig();
 
             CaptureAsync().Forget();
         }
