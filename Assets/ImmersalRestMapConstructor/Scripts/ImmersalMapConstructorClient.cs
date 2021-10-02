@@ -11,13 +11,15 @@ namespace ImmersalRestMapConstructor
     public class ImmersalMapConstructorClient
     {
         private static readonly string BASE_URL = "https://api.immersal.com";
-        
-        public static async UniTask<(bool, ImmersalImageResult)> TryRequestImage(CaptureMapInfo info, int index)
+
+        public static async UniTask<(bool, ImmersalImageResult)> TryRequestImage(CaptureMapInfo info, int index,
+            string filename)
         {
-            var (isExist, base64) = await PersistantDataFileManager.ReadCaptureImageAsBase64($"{index}.png");
-            
+            var (isExist, base64) = await PersistantDataFileManager.ReadCaptureImageAsBase64(filename);
+
             if (!isExist)
             {
+                Debug.Log("file doesnt exists");
                 return (false, default);
             }
 
@@ -40,8 +42,9 @@ namespace ImmersalRestMapConstructor
                 throw;
             }
         }
-        
-        private static ImmersalImageRequest CreateImageRequestFromCaptureMapInfo(CaptureMapInfo info, int index, string b64)
+
+        private static ImmersalImageRequest CreateImageRequestFromCaptureMapInfo(CaptureMapInfo info, int index,
+            string b64)
         {
             var imageData = info.images[index];
 
@@ -59,7 +62,7 @@ namespace ImmersalRestMapConstructor
                 bank = 0,
                 run = 0,
                 index = index,
-                anchor =imageData.anchor,
+                anchor = imageData.anchor,
 
                 px = cameraPoseMatrix.m03,
                 py = cameraPoseMatrix.m13,
@@ -83,7 +86,7 @@ namespace ImmersalRestMapConstructor
                 altitude = imageData.location.altitude,
                 latitude = imageData.location.latitude,
                 longitude = imageData.location.longitude,
-                
+
                 b64 = b64
             };
 

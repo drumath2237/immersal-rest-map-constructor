@@ -31,27 +31,24 @@ namespace ImmersalRestMapConstructor
 
         private IEnumerator Start()
         {
-            if (!Input.location.isEnabledByUser)
-            {
-                yield break;
-            }
+            // if (!Input.location.isEnabledByUser)
+            // {
+            //     yield break;
+            // }
+            //
+            // Input.location.Start();
+            //
+            // _mapInfo = new CaptureMapInfo
+            // {
+            //     name = "Test Map",
+            //     token = "Test Token",
+            //     images = new List<CaptureImageInfo>()
+            // };
+            //
+            // _cameraManager.frameReceived += args => { InitializeCameraConfig(); };
 
-            Input.location.Start();
-
-            _mapInfo = new CaptureMapInfo
-            {
-                name = "Test Map",
-                token = "Test Token",
-                images = new List<CaptureImageInfo>()
-            };
-
-            _cameraManager.frameReceived += args =>
-            {
-                InitializeCameraConfig();
-            };
-
-            // SendImageCaptureRequest().Forget();
-            // yield return null;
+            SendImageCaptureRequest().Forget();
+            yield return null;
         }
 
         private void InitializeCameraConfig()
@@ -89,9 +86,17 @@ namespace ImmersalRestMapConstructor
 
             for (var i = 0; i < mapInfo.images.Count; i++)
             {
-                var (success, result) = await ImmersalMapConstructorClient.TryRequestImage(mapInfo, i);
+                var imageFilename = mapInfo.images[i].filename;
+                var (success, result) = await ImmersalMapConstructorClient.TryRequestImage(mapInfo, i, imageFilename);
 
-                Debug.Log(result.path);
+                if (success)
+                {
+                    Debug.Log($"{i}: {result.path}");
+                }
+                else
+                {
+                    Debug.LogError($"{i}: request failed");
+                }
             }
         }
 
