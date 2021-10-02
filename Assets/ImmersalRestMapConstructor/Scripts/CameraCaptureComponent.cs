@@ -167,6 +167,10 @@ namespace ImmersalRestMapConstructor
             PersistantDataFileManager
                 .SaveJsonDataAsync($"{dateTimeStamp}_capture.json", JsonUtility.ToJson(_mapInfo, true))
                 .Forget();
+
+            // clear images for continues capture
+            _mapInfo.images = new List<CaptureImageInfo>();
+            _captureIndex = 0;
         }
 
         private void Update()
