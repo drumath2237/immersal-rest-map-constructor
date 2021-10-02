@@ -139,18 +139,22 @@ namespace ImmersalRestMapConstructor
                 };
             }
 
+            var dateTimeStamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            var captureFileName = $"{dateTimeStamp}_{_captureIndex++}.png";
+
             var imageInfo = new CaptureImageInfo
             {
                 anchor = false,
                 location = Location.ConvertFromLocationInfo(Input.location.lastData),
                 pose = info.cameraPose,
-                run = 0
+                run = 0,
+                filename = captureFileName
             };
 
             _mapInfo.images.Add(imageInfo);
 
             PersistantDataFileManager
-                .SaveCaptureImage($"{_captureIndex++}.png", info.cameraTexture)
+                .SaveCaptureImage(captureFileName, info.cameraTexture)
                 .Forget();
 
             _texture2D = info.cameraTexture;
@@ -158,8 +162,10 @@ namespace ImmersalRestMapConstructor
 
         public void SaveJsonData()
         {
+            var dateTimeStamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+
             PersistantDataFileManager
-                .SaveJsonDataAsync("imageData.json", JsonUtility.ToJson(_mapInfo, true))
+                .SaveJsonDataAsync($"{dateTimeStamp}_capture.json", JsonUtility.ToJson(_mapInfo, true))
                 .Forget();
         }
 

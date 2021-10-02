@@ -29,6 +29,7 @@ namespace ImmersalRestMapConstructor.CaptureData
         public int run; // incremented when tracking failed
         public bool anchor;
         public Location location;
+        public string filename;
     }
 
     [Serializable]
