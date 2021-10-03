@@ -43,6 +43,34 @@ namespace ImmersalRestMapConstructor
             }
         }
 
+        public static async UniTask<(bool, ImmersalConstructResult)> TryRequestConstructMap(CaptureMapInfo info,
+            string mapName = "")
+        {
+            var constructRequest = CreateConstructRequestFromMapInfo(info);
+
+            if (mapName != String.Empty)
+            {
+                constructRequest.name = mapName;
+            }
+
+            var request = new UnityWebRequest($"{BASE_URL}/construct", "POST");
+            var byteRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(constructRequest));
+            request.uploadHandler = new UploadHandlerRaw(byteRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            try
+            {
+                var res = await request.SendWebRequest();
+                return (true, JsonUtility.FromJson<ImmersalConstructResult>(res.downloadHandler.text));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("construct request failed with " + e);
+                throw;
+            }
+        }
+
         private static ImmersalImageRequest CreateImageRequestFromCaptureMapInfo(CaptureMapInfo info, int index,
             string b64)
         {

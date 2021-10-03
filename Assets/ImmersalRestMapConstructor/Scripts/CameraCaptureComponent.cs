@@ -11,6 +11,12 @@ using UnityEngine.XR.ARFoundation;
 
 namespace ImmersalRestMapConstructor
 {
+    enum RequestTaskFor
+    {
+        Capture,
+        MapConstructions,
+    }
+
     public class CameraCaptureComponent : MonoBehaviour
     {
         [SerializeField] private ARCameraManager _cameraManager;
@@ -19,6 +25,7 @@ namespace ImmersalRestMapConstructor
 
         [SerializeField] private MeshRenderer _renderer;
 
+        [SerializeField] private RequestTaskFor _taskFor;
 
         private Texture2D _texture2D;
 
@@ -31,24 +38,37 @@ namespace ImmersalRestMapConstructor
 
         private IEnumerator Start()
         {
-            // if (!Input.location.isEnabledByUser)
-            // {
-            //     yield break;
-            // }
-            //
-            // Input.location.Start();
-            //
-            // _mapInfo = new CaptureMapInfo
-            // {
-            //     name = "Test Map",
-            //     token = "Test Token",
-            //     images = new List<CaptureImageInfo>()
-            // };
-            //
-            // _cameraManager.frameReceived += args => { InitializeCameraConfig(); };
+            switch (_taskFor)
+            {
+                case RequestTaskFor.Capture:
+                    Debug.Log("=============== Capture Mode =============");
+                    
+                    if (!Input.location.isEnabledByUser)
+                    {
+                        yield break;
+                    }
 
-            SendImageCaptureRequest().Forget();
-            yield return null;
+                    Input.location.Start();
+
+                    _mapInfo = new CaptureMapInfo
+                    {
+                        name = "map name here",
+                        token = "enter token here",
+                        images = new List<CaptureImageInfo>()
+                    };
+
+                    _cameraManager.frameReceived += args => { InitializeCameraConfig(); };
+                    break;
+
+                case RequestTaskFor.MapConstructions:
+                    Debug.Log("=============== Map Construction Mode =============");
+
+                    SendImageCaptureRequest().Forget();
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private void InitializeCameraConfig()
@@ -98,6 +118,12 @@ namespace ImmersalRestMapConstructor
                     Debug.LogError($"{i}: request failed");
                 }
             }
+
+            var (constructSuccess, constructResult) = await ImmersalMapConstructorClient.TryRequestConstructMap(mapInfo);
+
+            Debug.Log(constructSuccess
+                ? $"map id: {constructResult.id}, map size: {constructResult.size}"
+                : $"map construction failed with: {constructResult.error}");
         }
 
         public void Capture()

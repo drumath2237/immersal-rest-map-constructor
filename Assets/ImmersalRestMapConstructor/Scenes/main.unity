@@ -470,6 +470,7 @@ MonoBehaviour:
   _cameraManager: {fileID: 899553519}
   _logText: {fileID: 2064804945}
   _renderer: {fileID: 1790167336}
+  _taskFor: 1
 --- !u!4 &375081097
 Transform:
   m_ObjectHideFlags: 0
