@@ -23,8 +23,6 @@ namespace ImmersalRestMapConstructor
 
         [SerializeField] private TextMeshProUGUI _logText;
 
-        [SerializeField] private MeshRenderer _renderer;
-
         [SerializeField] private RequestTaskFor _taskFor;
 
         private Texture2D _texture2D;
@@ -198,16 +196,7 @@ namespace ImmersalRestMapConstructor
             _mapInfo.images = new List<CaptureImageInfo>();
             _captureIndex = 0;
         }
-
-        private void Update()
-        {
-            // _logText.text = ARSession.state.ToString();
-            if (_renderer != null && _texture2D != null)
-            {
-                _renderer.material.mainTexture = _texture2D;
-            }
-        }
-
+        
         private void OnDestroy()
         {
             Input.location.Stop();
