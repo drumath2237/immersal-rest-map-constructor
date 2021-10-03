@@ -109,14 +109,7 @@ namespace ImmersalRestMapConstructor
                 var imageFilename = mapInfo.images[i].filename;
                 var (success, result) = await ImmersalMapConstructorClient.TryRequestImage(mapInfo, i, imageFilename);
 
-                if (success)
-                {
-                    Debug.Log($"{i}: {result.path}");
-                }
-                else
-                {
-                    Debug.LogError($"{i}: request failed");
-                }
+                Debug.Log(success ? $"{i}: {result.path}" : $"{i}: request failed");
             }
 
             var (constructSuccess, constructResult) = await ImmersalMapConstructorClient.TryRequestConstructMap(mapInfo);
@@ -124,6 +117,8 @@ namespace ImmersalRestMapConstructor
             Debug.Log(constructSuccess
                 ? $"map id: {constructResult.id}, map size: {constructResult.size}"
                 : $"map construction failed with: {constructResult.error}");
+
+            _ = ImmersalMapConstructorClient.TryClearRequest(mapInfo);
         }
 
         public void Capture()

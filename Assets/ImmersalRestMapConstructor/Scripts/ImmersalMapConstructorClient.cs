@@ -71,6 +71,34 @@ namespace ImmersalRestMapConstructor
             }
         }
 
+        public static async UniTask<(bool, ImmersalClearResult)> TryClearRequest(CaptureMapInfo info)
+        {
+            var clearRequest = new ImmersalClearRequest()
+            {
+                anchor = true,
+                bank = 0,
+                token = info.token
+            };
+            
+            var request = new UnityWebRequest($"{BASE_URL}/clear", "POST");
+            var byteRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(clearRequest));
+            request.uploadHandler = new UploadHandlerRaw(byteRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            try
+            {
+                var res = await request.SendWebRequest();
+                return (true, JsonUtility.FromJson<ImmersalClearResult>(res.downloadHandler.text));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("clear request failed with " + e);
+                throw;
+            }
+
+        }
+
         private static ImmersalImageRequest CreateImageRequestFromCaptureMapInfo(CaptureMapInfo info, int index,
             string b64)
         {
